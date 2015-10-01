@@ -12,7 +12,7 @@ $VERSION = "1";
 	authors			=> 'Jaykob Ross',
 	contact 		=> 'Mosai@mosai57.com',
 	name			=> 'Countdown',
-	description 	=> 'Stores, returns, and calculates a countdown to a specified date.',
+	description 		=> 'Stores, returns, and calculates a countdown to a specified date.',
 	created			=> '09/27/2015',
 	changed 		=> '09/27/2015',
 );
@@ -60,8 +60,8 @@ sub generate_output
 	
 	my $days 	= floor($cdn / 86400);
 	my $hours 	= ($cdn / 3600) % 24;
-	my $minutes = ($cdn / 60) % 60;
-	my $seconds = ($cdn) % 60;
+	my $minutes 	= ($cdn / 60) % 60;
+	my $seconds 	= ($cdn) % 60;
 	
 	my $string = "$shc: " . format_string($days, $hours, $minutes, $seconds);
 	

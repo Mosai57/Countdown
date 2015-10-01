@@ -39,7 +39,7 @@ sub delete_event
 {
 	my $shc = shift;
 	my $db = open_db();
-	delete $db->shc;
+	delete $db->{$shc};
 }
 
 ## Processing Functions ###

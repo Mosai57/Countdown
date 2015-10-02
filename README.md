@@ -11,3 +11,8 @@ To add an event to the database, the command is:
 Once an event is in the database it can be accessed until it expires using the command:
  
 	!cdn (shc)
+
+A demonstration bot is set up on mibbit. Connection instructions are below
+
+	Server:	 irc.mibbit.net
+	Channel: #ircdemon

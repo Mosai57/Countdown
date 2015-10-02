@@ -17,4 +17,4 @@ A demonstration bot is set up on mibbit. Connection instructions are below
 	Server:	  irc.mibbit.net
 	Channel:  #ircdemon
 	
-Web Link: [#ircdemon on irc.mibbit.net])https://kiwiirc.com/client/irc.mibbit.net/?nick=&theme=basic#ircdemon)
+Web Link: [#ircdemon on irc.mibbit.net](https://kiwiirc.com/client/irc.mibbit.net/?nick=&theme=basic#ircdemon)

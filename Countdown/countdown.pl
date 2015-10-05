@@ -12,7 +12,7 @@ $VERSION = "1";
 	authors			=> 'Jaykob Ross',
 	contact 		=> 'Mosai@mosai57.com',
 	name			=> 'Countdown',
-	description 		=> 'Stores, returns, and calculates a countdown to a specified date.',
+	description 	=> 'Stores, returns, and calculates a countdown to a specified date.',
 	created			=> '09/27/2015',
 	changed 		=> '09/27/2015',
 );
@@ -52,10 +52,10 @@ sub generate_output
 	if($date < time())
 	{
 		delete_event($shc);
-		return "$shc occured on " . scalar(localtime($date)) . ", removing the shc from the database.";
+		return "$shc occured on " . scalar(localtime($date));
 	}
 	
-	# Hit only if the shc passed to the function has not expired.
+	# Hit only if the shc passed to the function is unique.
 	my $cdn = $date - time();
 	
 	my $days 	= floor($cdn / 86400);
@@ -63,7 +63,8 @@ sub generate_output
 	my $minutes 	= ($cdn / 60) % 60;
 	my $seconds 	= ($cdn) % 60;
 	
-	my $string = "$shc: " . format_string($days, $hours, $minutes, $seconds);
+	my $string = "$shc: ";
+	$string .= format_string($days, $hours, $minutes, $seconds);
 	
 	return $string
 }
@@ -130,7 +131,8 @@ sub search_event_frontend
 	if($message =~  /^!cdn \w+$/i)
 	{
 		my (undef, $shc) = split(' ', $message);
-		
+		$shc = lc($shc);	# Ensures that the shc will be found in the db if it exists. All SHCs in the db are lc.		
+
 		my $db = open_db();
 		if(exists $db->{$shc})
 		{

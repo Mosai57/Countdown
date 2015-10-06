@@ -12,6 +12,10 @@ Once an event is in the database it can be accessed until it expires using the c
  
 	!cdn (shc)
 
+To check what date a particular event occurs on, use the following command:
+
+	!datefor (shc)
+
 A demonstration bot is set up on mibbit. Connection instructions are below
 
 	Server:	  irc.mibbit.net

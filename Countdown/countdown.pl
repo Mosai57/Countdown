@@ -147,5 +147,25 @@ sub search_event_frontend
 	}
 }
 
+sub date_for_frontend
+{
+	my ($server, $message, $nick, $address, $target) = @_;
+	
+	if($message =~ /^!datefor \w+$/i)
+	{
+		my (undef, $shc) = split(' ', $message);
+		$shc = lc($shc);
+		
+		my $db = open_db();
+		if(exists $db->{$shc})
+		{
+			my $time = $db->{$shc};
+			$server->command("MSG $target " . scalar(localtime($time)));
+		}
+	}
+}
+
+
 signal_add('message public', \&add_event_frontend);
 signal_add('message public', \&search_event_frontend);
+signal_add('message public', \&date_for_frontend);

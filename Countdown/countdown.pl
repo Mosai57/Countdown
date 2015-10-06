@@ -12,7 +12,7 @@ $VERSION = "1";
 	authors			=> 'Jaykob Ross',
 	contact 		=> 'Mosai@mosai57.com',
 	name			=> 'Countdown',
-	description 	=> 'Stores, returns, and calculates a countdown to a specified date.',
+	description 		=> 'Stores, returns, and calculates a countdown to a specified date.',
 	created			=> '09/27/2015',
 	changed 		=> '09/27/2015',
 );
@@ -131,7 +131,7 @@ sub search_event_frontend
 	if($message =~  /^!cdn \w+$/i)
 	{
 		my (undef, $shc) = split(' ', $message);
-		$shc = lc($shc);	# Ensures that the shc will be found in the db if it exists. All SHCs in the db are lc.		
+		$shc = lc($shc); # Ensures that the shc will be found in the db if it exists. All SHCs in the db are lc.		
 
 		my $db = open_db();
 		if(exists $db->{$shc})
@@ -142,7 +142,7 @@ sub search_event_frontend
 		}
 		else
 		{
-			$server->command("MSG $target The shc ( $shc ) does not yet exist.");
+			$server->command("MSG $target The shc ( $shc ) does not exist.");
 		}
 	}
 }
@@ -163,9 +163,12 @@ sub date_for_frontend
 			$time =~ s/\d{2}:\d{2}:\d{2} //;
 			$server->command("MSG $target $time");
 		}
+		else
+		{
+			$server->command("MSG $target The shc ( $shc ) does not exist.");
+		}
 	}
 }
-
 
 signal_add('message public', \&add_event_frontend);
 signal_add('message public', \&search_event_frontend);

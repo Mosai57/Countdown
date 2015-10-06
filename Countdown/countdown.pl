@@ -159,8 +159,9 @@ sub date_for_frontend
 		my $db = open_db();
 		if(exists $db->{$shc})
 		{
-			my $time = $db->{$shc};
-			$server->command("MSG $target " . scalar(localtime($time)));
+			my $time = scalar(localtime($db->{$shc}));
+			$time =~ s/\d{2}:\d{2}:\d{2} //;
+			$server->command("MSG $target $time");
 		}
 	}
 }

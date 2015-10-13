@@ -7,6 +7,8 @@ Used to call the countdown function for that entry in the database.
 Each event entry has three pieces to it, the SHC, the date timestamp, and the name of 
 the user that registered the event.
 
+The script is built to curate its on database. If the current date is beyond what the date registered to an event is, the script will remove that database entry and free up the SHC for that event.
+
 To add an event to the database, the command is:
   
 	!addcdn (shc) (date in mm/dd/yyyy format)

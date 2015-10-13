@@ -14,7 +14,7 @@ $VERSION = "1";
 	name			=> 'Countdown',
 	description 		=> 'Stores, returns, and calculates a countdown to a specified date.',
 	created			=> '09/27/2015',
-	changed 		=> '09/27/2015',
+	changed 		=> '10/13/2015',
 );
 
 ### Database Functions ###
@@ -30,9 +30,10 @@ sub open_db
 
 sub add_event
 {
-	my ($shc, $date) = @_;
+	my ($shc, $date, $reg_name) = @_;
 	my $db = open_db();
-	$db->{$shc} = $date;
+	$db->{$shc}->{date} = $date;
+	$db->{$shc}->{nick} = $reg_name;
 }
 
 sub delete_event
@@ -40,6 +41,13 @@ sub delete_event
 	my $shc = shift;
 	my $db = open_db();
 	delete $db->{$shc};
+}
+
+sub mod_event
+{
+	my ($shc, $new_date) = @_;
+	my $db = open_db();
+	$db->{$shc}->{date} = $new_date;
 }
 
 ## Processing Functions ###
@@ -118,7 +126,7 @@ sub add_event_frontend
 		
 		if(!(exists $db->{$shc}))
 		{
-			add_event(lc($shc), create_timestamp($date));
+			add_event(lc($shc), create_timestamp($date), lc($nick));
 			$server->command("MSG $target Countdown saved.");
 		}
 	}
@@ -136,7 +144,7 @@ sub search_event_frontend
 		my $db = open_db();
 		if(exists $db->{$shc})
 		{
-			my $time = $db->{$shc};
+			my $time = $db->{$shc}->{date};
 			my $output = generate_output($shc, $time);
 			$server->command("MSG $target $output");
 		}
@@ -159,7 +167,7 @@ sub date_for_frontend
 		my $db = open_db();
 		if(exists $db->{$shc})
 		{
-			my $time = scalar(localtime($db->{$shc}));
+			my $time = scalar(localtime($db->{$shc}->{date}));
 			$time =~ s/\d{2}:\d{2}:\d{2} //;
 			$server->command("MSG $target $time");
 		}
@@ -170,6 +178,54 @@ sub date_for_frontend
 	}
 }
 
+sub mod_date_frontend
+{
+	my ($server, $message, $nick, $address, $target) = @_;
+	
+	if($message =~ /^!moddate \w+ (0[1-9]|1[0-2])\/(0[1-9]|1\d|2\d|3[01])\/(19|20)\d{2}$/i)
+	{
+		my (undef, $shc, $new_date) = split(' ', $message);
+		$shc = lc($shc);
+		my $db = open_db();
+		
+		if(exists $db->{$shc})
+		{
+			if($db->{$shc}->{nick} eq lc($nick))
+			{
+				mod_event($shc, create_timestamp($new_date));
+				$server->command("MSG $target Date modified.");
+			}
+			else
+			{
+				$server->command("MSG $target You are not authorized to modify that shc");
+			}
+		}
+	}
+}
+
+sub del_event_frontend
+{
+	my ($server, $message, $nick, $address, $target) = @_;
+	
+	if($message =~ /^!deldate \w+$/i)
+	{
+		my (undef, $shc) = split(' ', $message);
+		$shc = lc($shc);
+		my $db = open_db();
+		
+		if(exists $db->{$shc})
+		{
+			if($db->{$shc}->{nick} eq lc($nick))
+			{
+				delete_event($shc);
+				$server->command("MSG $target The event $shc has been deleted.");
+			}
+		}
+	}
+}
+
 signal_add('message public', \&add_event_frontend);
 signal_add('message public', \&search_event_frontend);
 signal_add('message public', \&date_for_frontend);
+signal_add('message public', \&mod_date_frontend);
+signal_add('message public', \&del_event_frontend);

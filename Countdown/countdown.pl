@@ -169,7 +169,7 @@ sub date_for_frontend
 		{
 			my $time = scalar(localtime($db->{$shc}->{date}));
 			$time =~ s/\d{2}:\d{2}:\d{2} //;
-			$server->command("MSG $target $time");
+			$server->command("MSG $target $shc: $time, registered by " . $db->{$shc}->{nick});
 		}
 		else
 		{

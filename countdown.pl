@@ -30,40 +30,40 @@ sub open_db
 
 sub add_event
 {
-	my ($shc, $date, $reg_name) = @_;
+	my ($event, $date, $reg_name) = @_;
 	my $db = open_db();
-	$db->{$shc}->{date} = $date;
-	$db->{$shc}->{nick} = $reg_name;
+	$db->{$event}->{date} = $date;
+	$db->{$event}->{nick} = $reg_name;
 }
 
 sub delete_event
 {
-	my $shc = shift;
+	my $event = shift;
 	my $db = open_db();
-	delete $db->{$shc};
+	delete $db->{$event};
 }
 
 sub mod_event
 {
-	my ($shc, $new_date) = @_;
+	my ($event, $new_date) = @_;
 	my $db = open_db();
-	$db->{$shc}->{date} = $new_date;
+	$db->{$event}->{date} = $new_date;
 }
 
 ## Processing Functions ###
 
 sub generate_output
 {
-	my ($shc, $date) = @_;
+	my ($event, $date) = @_;
 	
 	# If the database entry expiry date is older than the current date.
 	if($date < time())
 	{
-		delete_event($shc);
-		return "$shc occured on " . scalar(localtime($date));
+		delete_event($event);
+		return "$event occured on " . scalar(localtime($date));
 	}
 	
-	# Hit only if the shc passed to the function is unique.
+	# Hit only if the event passed to the function is unique.
 	my $cdn = $date - time();
 	
 	my $days 	= floor($cdn / 86400);
@@ -71,7 +71,7 @@ sub generate_output
 	my $minutes 	= ($cdn / 60) % 60;
 	my $seconds 	= ($cdn) % 60;
 	
-	my $string = "$shc: ";
+	my $string = "$event: ";
 	$string .= format_string($days, $hours, $minutes, $seconds);
 	
 	return $string
@@ -121,8 +121,8 @@ sub add_event_frontend
 
 	if($message =~ /^!addcdn\s*(\w+)\s*(\S.*\S)$/i)
 	{
-		my ($shc, $date) = ($1, $2);
-        $shc = lc $shc;
+		my ($event, $date) = ($1, $2);
+        $event = lc $event;
 		my $db = open_db();
         
         my $message;
@@ -130,11 +130,11 @@ sub add_event_frontend
         my $when = create_timestamp($date);
         if (!defined $when) {
             $message = 'Invalid date';
-        } elsif (exists $db->{$shc}) {
+        } elsif (exists $db->{$event}) {
             $message = 'A countdown with that same name already exists.';
         } else {
-            add_event($shc, $when, lc($nick));
-            $message = generate_output($shc, $when);
+            add_event($event, $when, lc($nick));
+            $message = generate_output($event, $when);
 		}
         $server->command("MSG $target $message");
 	}
@@ -146,19 +146,19 @@ sub search_event_frontend
 	
 	if($message =~  /^!cdn \w+$/i)
 	{
-		my (undef, $shc) = split(' ', $message);
-		$shc = lc($shc); # Ensures that the shc will be found in the db if it exists. All SHCs in the db are lc.		
+		my (undef, $event) = split(' ', $message);
+		$event = lc($event); # Ensures that the event will be found in the db if it exists. All SHCs in the db are lc.		
 
 		my $db = open_db();
-		if(exists $db->{$shc})
+		if(exists $db->{$event})
 		{
-			my $time = $db->{$shc}->{date};
-			my $output = generate_output($shc, $time);
+			my $time = $db->{$event}->{date};
+			my $output = generate_output($event, $time);
 			$server->command("MSG $target $output");
 		}
 		else
 		{
-			$server->command("MSG $target The shc ( $shc ) does not exist.");
+			$server->command("MSG $target The event ( $event ) does not exist.");
 		}
 	}
 }
@@ -169,19 +169,19 @@ sub date_for_frontend
 	
 	if($message =~ /^!datefor\s*(\w+)$/i)
 	{
-		my ($shc) = ($1);
-		$shc = lc($shc);
+		my ($event) = ($1);
+		$event = lc($event);
 		
 		my $db = open_db();
-		if(exists $db->{$shc})
+		if(exists $db->{$event})
 		{
-			my $time = scalar(localtime($db->{$shc}->{date}));
+			my $time = scalar(localtime($db->{$event}->{date}));
 			$time =~ s/\d{2}:\d{2}:\d{2} //;
-			$server->command("MSG $target $shc: $time, registered by " . $db->{$shc}->{nick});
+			$server->command("MSG $target $event: $time, registered by " . $db->{$event}->{nick});
 		}
 		else
 		{
-			$server->command("MSG $target The cdn ( $shc ) does not exist.");
+			$server->command("MSG $target The event ( $event ) does not exist.");
 		}
 	}
 }
@@ -192,8 +192,8 @@ sub mod_date_frontend
 	
 	if($message =~ /^!moddate\s*(\w+)\s*(\S.*\S)/i)
 	{
-        my ($shc, $new_date) = ($1, $2);
-		$shc = lc($shc);
+        my ($event, $new_date) = ($1, $2);
+		$event = lc($event);
 		my $db = open_db();
         
         my $message;
@@ -201,10 +201,10 @@ sub mod_date_frontend
         my $when = create_timestamp($new_date);
         if (!defined $when) {
             $message = 'Invalid date';
-        } elsif (exists $db->{$shc} && $db->{$shc}{nick} ne lc($nick)) {
-            $message = "You are not authorized to modify that cdn";
+        } elsif (exists $db->{$event} && $db->{$event}{nick} ne lc($nick)) {
+            $message = "You are not authorized to modify that event";
         } else {
-            delete $db->{$shc};
+            delete $db->{$event};
             $_[1] =~ s/^!moddate/!addcdn/i;
             goto &add_event_frontend;
         }
@@ -219,19 +219,30 @@ sub del_event_frontend
 	
 	if($message =~ /^!(?:deldate|delcdn)\s*(\w+)$/i)
 	{
-		my ($shc) = ($1);
-		$shc = lc($shc);
+		my ($event) = ($1);
+		$event = lc($event);
 		my $db = open_db();
 		
-		if(exists $db->{$shc})
+		if(exists $db->{$event})
 		{
-			if($db->{$shc}->{nick} eq lc($nick))
+			if($db->{$event}->{nick} eq lc($nick))
 			{
-				delete_event($shc);
-				$server->command("MSG $target The cdn $shc has been deleted.");
+				delete_event($event);
+				$server->command("MSG $target The event $event has been deleted.");
 			}
 		}
 	}
+}
+
+sub list_events_frontend
+{
+    my ($server, $message, $nick, $address, $target) = @_;
+
+    if($message =~ /^!(?:listcdns|listdates)\s*$/i){
+        my $db = open_db(); 
+	my @events = keys %$db;
+        $server->command("MSG $target " . join(', ', @events));
+    }
 }
 
 signal_add('message public', \&add_event_frontend);
@@ -239,3 +250,4 @@ signal_add('message public', \&search_event_frontend);
 signal_add('message public', \&date_for_frontend);
 signal_add('message public', \&mod_date_frontend);
 signal_add('message public', \&del_event_frontend);
+signal_add('message public', \&list_events_frontend);
